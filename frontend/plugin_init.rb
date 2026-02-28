@@ -32,6 +32,13 @@ ArchivesSpace::Application.extend_aspace_routes(
 )
 require "omniauth"
 
+# OmniAuth middleware runs at the Rack level and sees the full path
+# (e.g. /staff/auth/saml). Set path_prefix to match frontend_proxy_prefix
+# so OmniAuth intercepts /staff/auth/* instead of defaulting to /auth/*.
+OmniAuth.configure do |config|
+  config.path_prefix = "#{AppConfig[:frontend_proxy_prefix].to_s.chomp('/')}/auth"
+end
+
 Rails.application.config.middleware.use OmniAuth::Builder do
   oauth_definitions.each do |oauth_definition|
     verify_ssl = oauth_definition.fetch(:verify_ssl, true)
